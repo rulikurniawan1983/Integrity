@@ -238,3 +238,10 @@ export default function DashboardPage() {
   );
 }
 
+// Force server-side rendering to avoid build-time errors
+export async function getServerSideProps() {
+  return {
+    props: {},
+  };
+}
+
