@@ -21,15 +21,6 @@ interface Article {
   };
 }
 
-const categories = [
-  { value: 'all', label: 'Semua', icon: '📚' },
-  { value: 'perikanan', label: 'Perikanan', icon: '🐟' },
-  { value: 'peternakan', label: 'Peternakan', icon: '🐄' },
-  { value: 'kesehatan_hewan', label: 'Kesehatan Hewan', icon: '🏥' },
-  { value: 'teknologi', label: 'Teknologi', icon: '💻' },
-  { value: 'pengelolaan', label: 'Pengelolaan', icon: '📊' },
-  { value: 'regulasi', label: 'Regulasi', icon: '📋' },
-];
 
 const contentTypes = {
   article: { label: 'Artikel', icon: '📖', color: 'from-blue-500 to-cyan-500' },
@@ -41,7 +32,7 @@ const contentTypes = {
 export default function EdukasiPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('kesehatan_hewan');
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
@@ -125,8 +116,8 @@ export default function EdukasiPage() {
   return (
     <>
       <Head>
-        <title>Edukasi & Artikel - SLIDER | Dinas Perikanan dan Peternakan Kabupaten Bogor</title>
-        <meta name="description" content="Artikel edukatif tentang perikanan dan peternakan di Kabupaten Bogor" />
+        <title>Artikel Kesehatan Hewan - SLIDER | Dinas Perikanan dan Peternakan Kabupaten Bogor</title>
+        <meta name="description" content="Artikel edukatif tentang kesehatan hewan di Kabupaten Bogor" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
@@ -161,9 +152,9 @@ export default function EdukasiPage() {
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-blue-500 to-green-500 py-12">
           <div className="container mx-auto px-4">
-            <h2 className="text-4xl font-bold text-white text-center mb-4">Edukasi & Artikel</h2>
+            <h2 className="text-4xl font-bold text-white text-center mb-4">Artikel Kesehatan Hewan</h2>
             <p className="text-white/90 text-center text-lg max-w-2xl mx-auto">
-              Akses artikel, video, infografik, dan konten edukatif tentang perikanan dan peternakan
+              Akses artikel edukatif tentang kesehatan hewan, penyakit, pencegahan, dan penanganan
             </p>
           </div>
         </section>
@@ -188,22 +179,12 @@ export default function EdukasiPage() {
             </div>
           </form>
 
-          {/* Category Filters */}
+          {/* Category Info */}
           <div className="flex flex-wrap gap-3 justify-center mb-8">
-            {categories.map((category) => (
-              <button
-                key={category.value}
-                onClick={() => setSelectedCategory(category.value)}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
-                  selectedCategory === category.value
-                    ? 'bg-gradient-to-r from-blue-500 to-green-500 text-white shadow-lg'
-                    : 'bg-white text-gray-700 hover:shadow-md border border-gray-200'
-                }`}
-              >
-                <span className="mr-2">{category.icon}</span>
-                {category.label}
-              </button>
-            ))}
+            <div className="px-4 py-2 rounded-lg font-medium bg-gradient-to-r from-blue-500 to-green-500 text-white shadow-lg">
+              <span className="mr-2">🏥</span>
+              Kesehatan Hewan
+            </div>
           </div>
         </section>
 

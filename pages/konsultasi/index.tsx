@@ -12,6 +12,8 @@ interface Staff {
   photo_url: string | null;
   clinic_id: string | null;
   clinic_name?: string;
+  is_online?: boolean;
+  last_seen_at?: string;
 }
 
 interface Consultation {
@@ -47,6 +49,46 @@ export default function KonsultasiPage() {
 
   useEffect(() => {
     loadStaffList();
+    
+    // Subscribe to realtime updates for staff online status
+    const channel = supabase
+      .channel('staff-online-status')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'staff_users',
+          filter: 'is_active=eq.true'
+        },
+        (payload) => {
+          // Update staff status in the list
+          if (payload.new && 'is_online' in payload.new) {
+            setStaffList((prev) =>
+              prev.map((staff) =>
+                staff.id === payload.new.id
+                  ? {
+                      ...staff,
+                      is_online: payload.new.is_online,
+                      last_seen_at: payload.new.last_seen_at
+                    }
+                  : staff
+              )
+            );
+          }
+        }
+      )
+      .subscribe();
+
+    // Poll untuk update status setiap 30 detik
+    const interval = setInterval(() => {
+      loadStaffList();
+    }, 30000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(interval);
+    };
   }, []);
 
   useEffect(() => {
@@ -86,6 +128,8 @@ export default function KonsultasiPage() {
           specialization,
           photo_url,
           clinic_id,
+          is_online,
+          last_seen_at,
           clinics:clinic_id (
             name
           )
@@ -102,7 +146,9 @@ export default function KonsultasiPage() {
         specialization: staff.specialization,
         photo_url: staff.photo_url,
         clinic_id: staff.clinic_id,
-        clinic_name: staff.clinics?.name || 'Tidak ditentukan'
+        clinic_name: staff.clinics?.name || 'Tidak ditentukan',
+        is_online: staff.is_online || false,
+        last_seen_at: staff.last_seen_at
       }));
 
       setStaffList(formatted);
@@ -365,46 +411,112 @@ export default function KonsultasiPage() {
                   <p className="text-gray-600">Belum ada staff yang tersedia</p>
                 </div>
               ) : (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="space-y-4">
                   {staffList.map((staff) => (
                     <div
                       key={staff.id}
-                      className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition border border-gray-100"
+                      className="bg-white rounded-xl shadow-md hover:shadow-xl transition border border-gray-100 overflow-hidden"
                     >
-                      <div className="flex items-start gap-4 mb-4">
-                        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                          {staff.full_name.charAt(0)}
+                      <div className="flex items-center gap-6 p-6">
+                        {/* Foto Profil - Menonjol */}
+                        <div className="flex-shrink-0 relative">
+                          <div className="w-28 h-28 rounded-full p-1 bg-gradient-to-br from-blue-500 to-green-500 shadow-xl">
+                            {staff.photo_url ? (
+                              <img
+                                src={staff.photo_url}
+                                alt={staff.full_name}
+                                className="w-full h-full rounded-full object-cover"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  const parent = target.parentElement?.parentElement;
+                                  if (parent) {
+                                    const fallback = document.createElement('div');
+                                    fallback.className = 'w-full h-full rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center text-white text-3xl font-bold';
+                                    fallback.textContent = staff.full_name.charAt(0);
+                                    parent.appendChild(fallback);
+                                  }
+                                }}
+                              />
+                            ) : (
+                              <div className="w-full h-full rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-3xl font-bold">
+                                {staff.full_name.charAt(0)}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex-1">
-                          <h3 className="font-bold text-lg text-gray-800 mb-1">{staff.full_name}</h3>
-                          <p className="text-sm text-blue-600 font-medium">{staff.role}</p>
+
+                        {/* Informasi Staff */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-bold text-xl text-gray-800">{staff.full_name}</h3>
+                            {/* Indikator Online/Offline */}
+                            <div className="flex items-center gap-1.5">
+                              <div className="relative">
+                                <div className={`w-2.5 h-2.5 rounded-full ${
+                                  staff.is_online ? 'bg-green-500' : 'bg-gray-400'
+                                }`}></div>
+                                {staff.is_online && (
+                                  <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-green-500 animate-ping opacity-75"></div>
+                                )}
+                              </div>
+                              <span className={`text-xs font-semibold ${
+                                staff.is_online ? 'text-green-600' : 'text-gray-500'
+                              }`}>
+                                {staff.is_online ? 'Online' : 'Offline'}
+                              </span>
+                            </div>
+                          </div>
+                          <p className="text-sm text-blue-600 font-semibold mb-2">{staff.role}</p>
                           {staff.specialization && (
-                            <p className="text-sm text-gray-600 mt-1">{staff.specialization}</p>
+                            <p className="text-sm text-gray-600 mb-1">{staff.specialization}</p>
                           )}
-                          <p className="text-xs text-gray-500 mt-1">{staff.clinic_name}</p>
+                          {staff.clinic_name && (
+                            <p className="text-xs text-gray-500 flex items-center gap-1">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                              </svg>
+                              {staff.clinic_name}
+                            </p>
+                          )}
                         </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openChatModal(staff);
-                          }}
-                          className="px-3 py-2 bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg font-semibold text-sm hover:shadow-lg transition"
-                          disabled={loading}
-                        >
-                          💬 Chat
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openAppointmentModal(staff);
-                          }}
-                          className="px-3 py-2 bg-white border-2 border-blue-500 text-blue-600 rounded-lg font-semibold text-sm hover:bg-blue-50 transition"
-                          disabled={loading}
-                        >
-                          📅 Janji Temu
-                        </button>
+
+                        {/* Tombol Aksi */}
+                        <div className="flex-shrink-0 flex flex-col gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (staff.is_online) {
+                                openChatModal(staff);
+                              }
+                            }}
+                            className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition flex items-center justify-center gap-2 min-w-[120px] ${
+                              staff.is_online
+                                ? 'bg-gradient-to-r from-blue-500 to-green-500 text-white hover:shadow-lg transform hover:scale-105 cursor-pointer'
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
+                            }`}
+                            disabled={loading || !staff.is_online}
+                            title={!staff.is_online ? 'Staff sedang offline' : 'Mulai chat'}
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                            Chat
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openAppointmentModal(staff);
+                            }}
+                            className="px-5 py-2.5 bg-white border-2 border-blue-500 text-blue-600 rounded-lg font-semibold text-sm hover:bg-blue-50 transition transform hover:scale-105 flex items-center justify-center gap-2 min-w-[120px]"
+                            disabled={loading}
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            Janji Temu
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -417,13 +529,39 @@ export default function KonsultasiPage() {
               {/* Staff Info Sidebar */}
               <div className="md:col-span-1">
                 <div className="bg-white rounded-xl p-6 shadow-md h-full">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                      {selectedStaff?.full_name.charAt(0)}
+                  <div className="flex flex-col items-center gap-4 mb-6">
+                    <div className="relative">
+                      <div className="w-24 h-24 rounded-full p-1 bg-gradient-to-br from-blue-500 to-green-500 shadow-xl">
+                        {selectedStaff?.photo_url ? (
+                          <img
+                            src={selectedStaff.photo_url}
+                            alt={selectedStaff.full_name}
+                            className="w-full h-full rounded-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const parent = target.parentElement?.parentElement;
+                              if (parent) {
+                                const fallback = document.createElement('div');
+                                fallback.className = 'w-full h-full rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center text-white text-3xl font-bold';
+                                fallback.textContent = selectedStaff?.full_name.charAt(0) || '';
+                                parent.appendChild(fallback);
+                              }
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-3xl font-bold">
+                            {selectedStaff?.full_name.charAt(0)}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-bold text-lg text-gray-800">{selectedStaff?.full_name}</h3>
-                      <p className="text-sm text-blue-600">{selectedStaff?.role}</p>
+                    <div className="text-center">
+                      <h3 className="font-bold text-lg text-gray-800 mb-1">{selectedStaff?.full_name}</h3>
+                      <p className="text-sm text-blue-600 font-semibold mb-1">{selectedStaff?.role}</p>
+                      {selectedStaff?.specialization && (
+                        <p className="text-xs text-gray-500">{selectedStaff.specialization}</p>
+                      )}
                     </div>
                   </div>
                   <div className="space-y-4 text-sm">

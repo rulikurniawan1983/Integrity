@@ -2,7 +2,7 @@
 ## Sistem Layanan Integrasi Data Edukasi Realtime
 ### Dinas Perikanan dan Peternakan Kabupaten Bogor
 
-Platform layanan terintegrasi dengan desain modern (referensi Halodoc) untuk memberikan akses konsultasi, edukasi, dan data realtime terkait perikanan dan peternakan di Kabupaten Bogor.
+Platform layanan terintegrasi dengan desain modern (referensi Halodoc) untuk memberikan akses konsultasi, edukasi, dan rekomendasi praktek dokter hewan serta nomor kontrol veteriner terkait perikanan dan peternakan di Kabupaten Bogor.
 
 **Copyright © Ruli Kurniawan, S.Pt**
 
@@ -12,7 +12,7 @@ Platform layanan terintegrasi dengan desain modern (referensi Halodoc) untuk mem
 - **Konsultasi Online** - Chat dengan ahli perikanan dan peternakan secara realtime
 - **Edukasi Gratis** - Artikel, video, infografik, dan konten edukatif
 - **Layanan Klinik** - Booking pemeriksaan, vaksinasi, dan pengobatan hewan
-- **Layanan Rekomendasi** - Informasi harga pasar, produksi, dan data realtime
+- **Layanan Rekomendasi** - Rekomendasi Praktek Dokter Hewan dan Rekomendasi Nomor Kontrol Veteriner
 - **Tracking Layanan** - Lacak status permohonan layanan Anda
 
 ## 🛠 Tech Stack

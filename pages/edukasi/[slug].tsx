@@ -81,12 +81,18 @@ export default function ArticleDetailPage() {
 
       if (error) throw error;
 
+      // Handle staff_users which might be an array or single object
+      const staffUserData = data.staff_users;
+      const staffUser = Array.isArray(staffUserData) 
+        ? (staffUserData[0] as { full_name: string; role: string } | undefined)
+        : (staffUserData as { full_name: string; role: string } | null | undefined);
+      
       const formatted = {
         ...data,
-        author: data.staff_users ? { full_name: data.staff_users.full_name, role: data.staff_users.role } : undefined,
+        author: staffUser ? { full_name: staffUser.full_name, role: staffUser.role } : undefined,
       };
 
-      setArticle(formatted);
+      setArticle(formatted as Article);
     } catch (error: any) {
       console.error('Error loading article:', error);
       if (error.code === 'PGRST116') {
