@@ -283,29 +283,34 @@ export default function HomePage() {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase
-        .from('staff_users')
-        .select('*')
-        .eq('username', username)
-        .eq('is_active', true)
-        .single();
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
-      if (error || !data) {
-        toast.error('Username atau password salah');
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        toast.error(data.error || 'Username atau password salah');
         setLoading(false);
         return;
       }
 
       localStorage.setItem('user', JSON.stringify({
-        id: data.id,
-        username: data.username,
-        full_name: data.full_name,
-        role: data.role,
-        clinic_id: data.clinic_id
+        id: data.user.id,
+        username: data.user.username,
+        full_name: data.user.full_name,
+        role: data.user.role,
+        clinic_id: data.user.clinic_id
       }));
 
       toast.success('Login berhasil');
       setShowLoginModal(false);
+      setUsername('');
+      setPassword('');
       router.push('/dashboard');
     } catch (error) {
       console.error('Login error:', error);

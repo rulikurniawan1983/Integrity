@@ -63,14 +63,15 @@ export default function KonsultasiPage() {
         },
         (payload) => {
           // Update staff status in the list
-          if (payload.new && 'is_online' in payload.new) {
+          if (payload.new && 'is_online' in payload.new && 'id' in payload.new) {
+            const newData = payload.new as { id: string; is_online?: boolean; last_seen_at?: string };
             setStaffList((prev) =>
               prev.map((staff) =>
-                staff.id === payload.new.id
+                staff.id === newData.id
                   ? {
                       ...staff,
-                      is_online: payload.new.is_online,
-                      last_seen_at: payload.new.last_seen_at
+                      is_online: newData.is_online ?? false,
+                      last_seen_at: newData.last_seen_at
                     }
                   : staff
               )
@@ -135,7 +136,7 @@ export default function KonsultasiPage() {
           )
         `)
         .eq('is_active', true)
-        .in('role', ['Dokter Hewan', 'Ahli Perikanan', 'Ahli Peternakan']);
+        .in('role', ['Dokter Hewan', 'Paramedik Veteriner']);
 
       if (error) throw error;
 

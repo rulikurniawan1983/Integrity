@@ -213,7 +213,7 @@ export default function LayananPage() {
           )
         `)
         .eq('is_active', true)
-        .in('role', ['Dokter Hewan', 'Ahli Perikanan', 'Ahli Peternakan']);
+        .in('role', ['Dokter Hewan', 'Paramedik Veteriner']);
 
       if (error) throw error;
 
@@ -278,7 +278,7 @@ export default function LayananPage() {
       const serviceLabel = serviceTypes.find(s => s.value === formData.serviceType)?.label || 'Layanan';
       const descriptionText = `${serviceLabel} - Hewan: ${animalsInfo}`;
 
-      const { data, error } = await supabase
+      const { data: serviceRequest, error } = await supabase
         .from('service_requests')
         .insert({
           tracking_code: trackingCode,
@@ -287,6 +287,9 @@ export default function LayananPage() {
           service_type: formData.serviceType,
           appointment_date: formData.appointmentDate,
           appointment_time: formData.appointmentTime,
+          owner_name: formData.ownerName,
+          owner_kecamatan: formData.kecamatan,
+          owner_desa: formData.desa,
           description: descriptionText,
           status: 'pending'
         })
@@ -294,6 +297,24 @@ export default function LayananPage() {
         .single();
 
       if (error) throw error;
+
+      // Insert animals to service_animals table
+      if (validAnimals.length > 0 && serviceRequest) {
+        const animalsData = validAnimals.map(animal => ({
+          service_request_id: serviceRequest.id,
+          name: animal.name,
+          type: animal.type,
+          gender: animal.gender,
+          age: animal.age,
+          complaint: animal.complaint
+        }));
+
+        const { error: animalsError } = await supabase
+          .from('service_animals')
+          .insert(animalsData);
+
+        if (animalsError) throw animalsError;
+      }
 
       toast.success('Permohonan layanan berhasil dibuat!');
       
