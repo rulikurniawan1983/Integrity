@@ -253,17 +253,53 @@ Aplikasi menggunakan desain modern dengan referensi Halodoc:
 
 ## 🚀 Deployment
 
-### Vercel
-1. Connect GitHub repository
-2. Set environment variables di Vercel dashboard
-3. Deploy otomatis dari branch main
+### Quick Deploy ke Vercel
+
+#### Cara 1: Deploy via Vercel Dashboard (Recommended)
+
+1. **Login ke Vercel**: https://vercel.com/login
+2. **Import Project**: 
+   - Klik "Add New..." → "Project"
+   - Import dari GitHub: `rulikurniawan1983/Integrity`
+3. **Set Environment Variables**:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+   ```
+4. **Deploy**: Klik "Deploy" dan tunggu build selesai
+
+#### Cara 2: Deploy via Vercel CLI
+
+```bash
+npm i -g vercel
+vercel login
+vercel --prod
+```
+
+**Catatan**: Environment variables harus di-set di Vercel Dashboard.
 
 ### Environment Variables (Production)
+
+Tambahkan di Vercel Dashboard → Project Settings → Environment Variables:
+
 ```
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
+
+**Pilih**: Production, Preview, Development (untuk semua environment)
+
+### Auto Deploy
+
+Setelah setup pertama kali:
+- ✅ Setiap push ke `main` → Auto deploy ke **Production**
+- ✅ Setiap push ke branch lain → Auto deploy sebagai **Preview**
+
+### Dokumentasi Lengkap
+
+Lihat file **[DEPLOYMENT.md](./DEPLOYMENT.md)** untuk panduan lengkap deployment, troubleshooting, dan best practices.
 
 ## 📞 Kontak
 
