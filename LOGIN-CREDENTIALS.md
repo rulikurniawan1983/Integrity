@@ -8,10 +8,11 @@
 
 ⚠️ **Catatan Penting**: Semua akun staff menggunakan password default yang sama. Disarankan untuk mengubah password setelah login pertama kali (fitur dalam pengembangan).
 
-### Daftar Akun Staff
+### Daftar Akun Admin & Staff
 
 | Username | Nama Lengkap | Role | Klinik | Status |
 |----------|--------------|------|--------|--------|
+| `admin.dinas` | Admin Dinas Perikanan dan Peternakan | Admin | Klinik Dinas Perikanan dan Peternakan | Aktif |
 | `dr.ahmad` | Dr. Ahmad Fauzi, S.Pt | Dokter Hewan | Klinik Dinas Perikanan dan Peternakan | Aktif |
 | `dr.dedi.psc` | Dr. Dedi Kurniawan, S.Pt | Dokter Hewan | UPT Puskeswan Cibinong | Aktif |
 | `dr.gita.psl` | Dr. Gita Maharani, S.Pt | Dokter Hewan | UPT Puskeswan Laladon | Aktif |
@@ -27,10 +28,14 @@
 ### Fitur Dashboard
 
 Setelah login, admin/staff dapat mengakses:
-- Statistik permohonan layanan
-- Statistik ulasan pending (untuk approval)
-- Quick actions ke halaman layanan
+- **Dashboard** - Statistik permohonan layanan dan ulasan pending
+- **Kelola Layanan Klinik** - Manajemen permohonan layanan klinik
+- **Layanan Rekomendasi** - Manajemen rekomendasi praktek & NKV
+- **Konsultasi Online** - Manajemen konsultasi, pesan, dan janji temu
+- **Review Approval** - Persetujuan ulasan pengguna (khusus admin)
 - Logout untuk keluar dari sistem
+
+**Catatan**: Admin memiliki akses penuh ke semua data, sedangkan staff klinik hanya melihat data klinik masing-masing.
 
 ### Keamanan
 
